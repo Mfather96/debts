@@ -31,14 +31,8 @@ img {
 .root {
   padding: 10px 10px 80px 10px;
   width: 100%;
+  min-height: 100vh;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.debts__wrapper {
-  min-height: 100%;
-  overflow-y: scroll;
 }
 
 .debt-row {
@@ -175,8 +169,6 @@ img {
   flex-direction: column;
   gap: 20px;
   border-top: 1px solid #ccc;
-  background-color: #fff;
-  z-index: 1;
 }
 .total__wrapper div {
   display: flex;
