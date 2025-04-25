@@ -1,3 +1,4 @@
+import { addSeparator } from "../helpers/currency.helper";
 import CalculatorService from "../services/calc.service";
 
 export default class Total {
@@ -14,11 +15,11 @@ export default class Total {
         div.innerHTML = `
             <div class="total__per-month-wrp">
                 <span>Всего в месяц:</span>
-                <span>${perMonth} руб</span>
+                <span class="green-currency">${addSeparator(perMonth)} руб</span>
             </div>
             <div class="total__remaining-wrp">
                 <span>Остаток всего долга:</span>
-                <span>${remaining} руб</span>
+                <span class="blue-currency">${addSeparator(remaining)} руб</span>
             </div>
         `;
 

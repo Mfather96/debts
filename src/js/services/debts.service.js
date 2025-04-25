@@ -10,12 +10,12 @@ export default class DebtsService {
         return this.debts = await this.dataBaseService.getDebts();
     }
 
-    getDebtByName(name) {
+    getDebtById(id) {
         if (!this.debts.length) {
             return;
         }
 
-        const debt = this.debts.filter(debt => debt.name === name);
+        const debt = this.debts.filter(debt => debt.id === id);
         return debt[0];
     }
 }

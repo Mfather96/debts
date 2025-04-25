@@ -9,6 +9,8 @@ export default class DataBaseService {
     async getDebts() {
         const data = await supabase.from('debts').select('*');
 
+        console.log(data);
+
         return data.data;
     }
 
@@ -26,7 +28,7 @@ export default class DataBaseService {
     async updateDebt(debt, newValue) {
         await supabase.from('debts')
             .update(newValue)
-            .match({name: debt.name});
+            .match({id: debt.id});
     }
 
     async deleteDebt(debt) {
