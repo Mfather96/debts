@@ -21,13 +21,13 @@ export default class Debts {
     }
 
     bindTriggers() {
-        Array.from(this.root.children).forEach(debt => {
+        Array.from(this.root.querySelector('.debts__wrapper').children).forEach(debt => {
             debt.addEventListener('click', () => {
                 debt.querySelector('.buttons').classList.toggle('hide');
             })
         })
 
-        this.root.addEventListener('click', async (e) => {
+        this.root.querySelector('.debts__wrapper').addEventListener('click', async (e) => {
             e.preventDefault();
 
             if (e.target) {
