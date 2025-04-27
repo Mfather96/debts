@@ -2,18 +2,17 @@ import DataBaseService from "../services/dataBase.service";
 
 export default class AddNewModal {
     constructor() {
+        this.modal = document.querySelector('.modal');
         this.btn = document.querySelector('.add-new');
         this.form = document.querySelector('form');
-        this.modalClose = document.querySelector('.modal__close');
-        this.formSubmit = document.querySelector('.form__submit');
-        this.modal = document.querySelector('.modal');
+        this.modalClose = this.modal.querySelector('.modal__close');
         this.dataBaseService = new DataBaseService();
     }
 
     bindTriggers() {
-        this.postFormData();
-
         this.modalClose.addEventListener('click', () => {
+            console.log('clicked');
+
             this.closeModal();
         })
     }
@@ -21,8 +20,11 @@ export default class AddNewModal {
     openModal(isEdit = false, debt = null) {
         this.modal.style.display = 'block';
         this.modal.querySelector('.modal__content').appendChild(this.createForm(isEdit, debt));
+
         if (isEdit) {
             this.postFormData(isEdit, debt);
+        } else {
+            this.postFormData();
         }
     }
 
@@ -36,15 +38,14 @@ export default class AddNewModal {
                 return;
             }
 
-            if (!isUpdated) {
-                const data = new FormData(form);
-                await this.dataBaseService.postDebt(Object.fromEntries(data))
+            const data = Object.fromEntries(new FormData(form));
+            data.markAsDebt = form.querySelector('input[type="checkbox"]').checked;
 
+            if (!isUpdated) {
+                await this.dataBaseService.postDebt(data)
                 location.reload();
             } else {
-                const data = new FormData(form);
-                await this.dataBaseService.updateDebt(debt, Object.fromEntries(data))
-
+                await this.dataBaseService.updateDebt(debt, data)
                 location.reload();
             }
         })
@@ -53,7 +54,7 @@ export default class AddNewModal {
 
     closeModal() {
         this.modal.style.display = '';
-        this.form.reset();
+        this.modal.querySelector('form').reset();
     }
 
     validateForm(form) {
@@ -70,6 +71,10 @@ export default class AddNewModal {
     }
 
     createForm(isEditForm = false, debt = null) {
+        if (this.modal.querySelector('form')) {
+            this.modal.querySelector('form').remove();
+        }
+
         const form = document.createElement('form');
         form.classList.add('modal__form');
         form.setAttribute('action', '#');
@@ -88,6 +93,11 @@ export default class AddNewModal {
                     <label for="sumPerMonth">Сколько в месяц</label>
                     <input class="form__control" type="number" name="sumPerMonth" id="sumPerMonth" value="${debt.sumPerMonth}">
 
+                    <div class="checkbox">
+                        <input id="markAsDebt" type="checkbox" name="markAsDebt" ${debt.markAsDebt ? 'checked': ''}>
+                        <label for="markAsDebt">Отметить как долг</label>
+                    </div>
+
                     <div class="form__submit-wrp"><button class="form__submit" type="submit">Сохранить</button></div>
                 </form>
             `
@@ -103,6 +113,11 @@ export default class AddNewModal {
 
                     <label for="sumPerMonth">Сколько в месяц</label>
                     <input class="form__control" type="number" name="sumPerMonth" id="sumPerMonth">
+
+                    <div class="checkbox">
+                        <input id="markAsDebt" type="checkbox" name="markAsDebt">
+                        <label for="markAsDebt">Отметить как долг</label>
+                    </div>
 
                     <div class="form__submit-wrp"><button class="form__submit" type="submit">Сохранить</button></div>
                 </form>

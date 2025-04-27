@@ -8,17 +8,12 @@ export default class DataBaseService {
 
     async getDebts() {
         const data = await supabase.from('debts').select('*');
-
-        console.log(data);
-
         return data.data;
     }
 
     async postDebt(debt) {
-        console.log(debt);
-
         await supabase.from('debts').upsert([{
-            name: debt.debtName,
+            name: debt.name,
             remaining: +debt.remaining,
             sumPerMonth: +debt.sumPerMonth,
             isOver: false

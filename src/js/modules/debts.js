@@ -20,8 +20,19 @@ export default class Debts {
         this.addNewBtn.style.display = '';
 
         this.debts.forEach(debt => {
-            this.root.querySelector('.debts__wrapper').prepend(this.createRow(debt));
+            if (!debt.markAsDebt) {
+                this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
+            } else {
+                this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
+            }
         })
+        this.root.querySelector('.debts__list .list--title span').innerHTML = `
+            (${this.debts.filter(debt => debt.markAsDebt).length})
+        `
+
+        this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
+            (${this.debts.filter(debt => !debt.markAsDebt).length})
+        `
     }
 
     bindTriggers() {
@@ -30,9 +41,13 @@ export default class Debts {
             this.modal.init();
         })
 
-        Array.from(this.root.querySelector('.debts__wrapper').children).forEach(debt => {
-            debt.addEventListener('click', () => {
-                debt.querySelector('.buttons').classList.toggle('hide');
+        Array.from(this.root.querySelectorAll('.debts__list')).forEach(list => {
+            Array.from(list.children).forEach(debt => {
+                debt.addEventListener('click', () => {
+                    if (debt.querySelector('.buttons')) {
+                        debt.querySelector('.buttons').classList.toggle('hide');
+                    }
+                })
             })
         })
 
@@ -40,8 +55,18 @@ export default class Debts {
             e.preventDefault();
 
             if (e.target) {
-                let debtID = e.target.closest('.debt-row').getAttribute('id');
-                let debt = this.debtsService.getDebtById(debtID);
+                let debtID;
+                let debt;
+
+                if (e.target.parentNode.classList.contains('debts__list')) {
+
+                    e.target.parentNode.classList.toggle('opened');
+                }
+
+                if (e.target.closest('.debt-row')) {
+                    debtID = e.target.closest('.debt-row').getAttribute('id');
+                    debt = this.debtsService.getDebtById(debtID);
+                }
 
                 if (e.target.classList.contains('back-btn')) {
                     await this.dataBaseService.deleteDebt(debt);
@@ -58,8 +83,7 @@ export default class Debts {
 
                 if (e.target.classList.contains('edit-btn')) {
                     this.modal.openModal(true, debt);
-                    console.log(debt);
-
+                    this.modal.init();
                 }
             }
         })

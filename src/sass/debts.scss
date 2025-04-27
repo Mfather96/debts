@@ -7,11 +7,73 @@
         display: none;
     }
 }
+.not-debts__list {
+    // border-top: 1px solid #222;
+    margin-top: 5px;
+    padding-top: 10px;
+}
+.debts__list {
+
+    .list--title {
+        position: relative;
+        padding-left: 20px;
+        color: #444;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 10px;
+
+        &:before,
+        &:after {
+            content: '';
+            transition: all ease 0.1s;
+            position: absolute;
+            display: block;
+            background: #413e3e;
+            width: 10px;
+            height: 2px;
+            top: 6px;
+        }
+
+        &:before {
+            left: 0;
+            transform: rotate(45deg);
+        }
+
+        &:after {
+            left: 6px;
+            transform: rotate(-45deg);
+        }
+
+    }
+
+    &.opened {
+
+        .list--title {
+
+            &:before {
+                transform: rotate(135deg);
+            }
+
+            &:after {
+                transform: rotate(-135deg);
+            }
+        }
+    }
+}
+
 
 .debt-row {
     padding: 3px;
-    border-bottom: 1px solid #ccc;
-    margin-bottom: 10px;
+    display: none;
+
+    .debts__list.opened & {
+        display: block;
+    }
+
+    &:not(:last-child) {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+    }
 
     .row-first,
     .row-second {

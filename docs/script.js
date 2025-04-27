@@ -11328,24 +11328,45 @@ class Debts {
     this.root.querySelector('.loader').remove();
     this.addNewBtn.style.display = '';
     this.debts.forEach(debt => {
-      this.root.querySelector('.debts__wrapper').prepend(this.createRow(debt));
+      if (!debt.markAsDebt) {
+        this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
+      } else {
+        this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
+      }
     });
+    this.root.querySelector('.debts__list .list--title span').innerHTML = `
+            (${this.debts.filter(debt => debt.markAsDebt).length})
+        `;
+    this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
+            (${this.debts.filter(debt => !debt.markAsDebt).length})
+        `;
   }
   bindTriggers() {
     this.addNewBtn.addEventListener('click', () => {
       this.modal.openModal();
       this.modal.init();
     });
-    Array.from(this.root.querySelector('.debts__wrapper').children).forEach(debt => {
-      debt.addEventListener('click', () => {
-        debt.querySelector('.buttons').classList.toggle('hide');
+    Array.from(this.root.querySelectorAll('.debts__list')).forEach(list => {
+      Array.from(list.children).forEach(debt => {
+        debt.addEventListener('click', () => {
+          if (debt.querySelector('.buttons')) {
+            debt.querySelector('.buttons').classList.toggle('hide');
+          }
+        });
       });
     });
     this.root.querySelector('.debts__wrapper').addEventListener('click', async e => {
       e.preventDefault();
       if (e.target) {
-        let debtID = e.target.closest('.debt-row').getAttribute('id');
-        let debt = this.debtsService.getDebtById(debtID);
+        let debtID;
+        let debt;
+        if (e.target.parentNode.classList.contains('debts__list')) {
+          e.target.parentNode.classList.toggle('opened');
+        }
+        if (e.target.closest('.debt-row')) {
+          debtID = e.target.closest('.debt-row').getAttribute('id');
+          debt = this.debtsService.getDebtById(debtID);
+        }
         if (e.target.classList.contains('back-btn')) {
           await this.dataBaseService.deleteDebt(debt);
           location.reload();
@@ -11360,7 +11381,7 @@ class Debts {
         }
         if (e.target.classList.contains('edit-btn')) {
           this.modal.openModal(true, debt);
-          console.log(debt);
+          this.modal.init();
         }
       }
     });
@@ -11428,16 +11449,15 @@ __webpack_require__.r(__webpack_exports__);
 
 class AddNewModal {
   constructor() {
+    this.modal = document.querySelector('.modal');
     this.btn = document.querySelector('.add-new');
     this.form = document.querySelector('form');
-    this.modalClose = document.querySelector('.modal__close');
-    this.formSubmit = document.querySelector('.form__submit');
-    this.modal = document.querySelector('.modal');
+    this.modalClose = this.modal.querySelector('.modal__close');
     this.dataBaseService = new _services_dataBase_service__WEBPACK_IMPORTED_MODULE_0__["default"]();
   }
   bindTriggers() {
-    this.postFormData();
     this.modalClose.addEventListener('click', () => {
+      console.log('clicked');
       this.closeModal();
     });
   }
@@ -11446,6 +11466,8 @@ class AddNewModal {
     this.modal.querySelector('.modal__content').appendChild(this.createForm(isEdit, debt));
     if (isEdit) {
       this.postFormData(isEdit, debt);
+    } else {
+      this.postFormData();
     }
   }
   postFormData(isUpdated = false, debt = null) {
@@ -11455,20 +11477,20 @@ class AddNewModal {
       if (this.validateForm(form)) {
         return;
       }
+      const data = Object.fromEntries(new FormData(form));
+      data.markAsDebt = form.querySelector('input[type="checkbox"]').checked;
       if (!isUpdated) {
-        const data = new FormData(form);
-        await this.dataBaseService.postDebt(Object.fromEntries(data));
+        await this.dataBaseService.postDebt(data);
         location.reload();
       } else {
-        const data = new FormData(form);
-        await this.dataBaseService.updateDebt(debt, Object.fromEntries(data));
+        await this.dataBaseService.updateDebt(debt, data);
         location.reload();
       }
     });
   }
   closeModal() {
     this.modal.style.display = '';
-    this.form.reset();
+    this.modal.querySelector('form').reset();
   }
   validateForm(form) {
     const inputs = form.querySelectorAll('input');
@@ -11481,6 +11503,9 @@ class AddNewModal {
     }
   }
   createForm(isEditForm = false, debt = null) {
+    if (this.modal.querySelector('form')) {
+      this.modal.querySelector('form').remove();
+    }
     const form = document.createElement('form');
     form.classList.add('modal__form');
     form.setAttribute('action', '#');
@@ -11498,6 +11523,11 @@ class AddNewModal {
                     <label for="sumPerMonth">Сколько в месяц</label>
                     <input class="form__control" type="number" name="sumPerMonth" id="sumPerMonth" value="${debt.sumPerMonth}">
 
+                    <div class="checkbox">
+                        <input id="markAsDebt" type="checkbox" name="markAsDebt" ${debt.markAsDebt ? 'checked' : ''}>
+                        <label for="markAsDebt">Отметить как долг</label>
+                    </div>
+
                     <div class="form__submit-wrp"><button class="form__submit" type="submit">Сохранить</button></div>
                 </form>
             `;
@@ -11513,6 +11543,11 @@ class AddNewModal {
 
                     <label for="sumPerMonth">Сколько в месяц</label>
                     <input class="form__control" type="number" name="sumPerMonth" id="sumPerMonth">
+
+                    <div class="checkbox">
+                        <input id="markAsDebt" type="checkbox" name="markAsDebt">
+                        <label for="markAsDebt">Отметить как долг</label>
+                    </div>
 
                     <div class="form__submit-wrp"><button class="form__submit" type="submit">Сохранить</button></div>
                 </form>
@@ -11623,13 +11658,11 @@ class DataBaseService {
   constructor() {}
   async getDebts() {
     const data = await supabase.from('debts').select('*');
-    console.log(data);
     return data.data;
   }
   async postDebt(debt) {
-    console.log(debt);
     await supabase.from('debts').upsert([{
-      name: debt.debtName,
+      name: debt.name,
       remaining: +debt.remaining,
       sumPerMonth: +debt.sumPerMonth,
       isOver: false
