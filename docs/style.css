@@ -132,6 +132,10 @@ img {
   margin: 0 auto;
 }
 
+.hide {
+  display: none;
+}
+
 .debts__wrapper {
   min-height: 100%;
   overflow-y: scroll;

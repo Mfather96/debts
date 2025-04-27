@@ -2,8 +2,8 @@ import { addSeparator } from "../helpers/currency.helper";
 import CalculatorService from "../services/calc.service";
 
 export default class Total {
-    constructor() {
-        this.root = document.querySelector('.root');
+    constructor(root) {
+        this.root = root;
         this.calcService = new CalculatorService();
     }
 

@@ -16,7 +16,8 @@ export default class DataBaseService {
             name: debt.name,
             remaining: +debt.remaining,
             sumPerMonth: +debt.sumPerMonth,
-            isOver: false
+            isOver: false,
+            markAsDebt: debt.markAsDebt,
         }]);
     }
 
