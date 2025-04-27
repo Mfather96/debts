@@ -11360,7 +11360,7 @@ class Debts {
       if (e.target) {
         let debtID;
         let debt;
-        if (e.target.parentNode.classList.contains('debts__list')) {
+        if (e.target.classList.contains('list--title')) {
           e.target.parentNode.classList.toggle('opened');
         }
         if (e.target.closest('.debt-row')) {
