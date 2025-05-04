@@ -11317,11 +11317,9 @@ window.addEventListener('DOMContentLoaded', () => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Debts; });
-/* harmony import */ var _helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helpers/currency.helper */ "./src/js/helpers/currency.helper.js");
-/* harmony import */ var _services_dataBase_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/dataBase.service */ "./src/js/services/dataBase.service.js");
-/* harmony import */ var _services_debts_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/debts.service */ "./src/js/services/debts.service.js");
-/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modal */ "./src/js/modules/modal.js");
-
+/* harmony import */ var _services_dataBase_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/dataBase.service */ "./src/js/services/dataBase.service.js");
+/* harmony import */ var _services_debts_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/debts.service */ "./src/js/services/debts.service.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal */ "./src/js/modules/modal.js");
 
 
 
@@ -11330,9 +11328,9 @@ class Debts {
     this.debts = [];
     this.root = root;
     this.addNewBtn = this.root.querySelector('.add-new');
-    this.debtsService = new _services_debts_service__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    this.dataBaseService = new _services_dataBase_service__WEBPACK_IMPORTED_MODULE_1__["default"]();
-    this.modal = new _modal__WEBPACK_IMPORTED_MODULE_3__["default"]();
+    this.debtsService = new _services_debts_service__WEBPACK_IMPORTED_MODULE_1__["default"]();
+    this.dataBaseService = new _services_dataBase_service__WEBPACK_IMPORTED_MODULE_0__["default"]();
+    this.modal = new _modal__WEBPACK_IMPORTED_MODULE_2__["default"]();
   }
   async render() {
     this.root.querySelector('.loader').remove();
@@ -11400,9 +11398,9 @@ class Debts {
             `;
       filteredDebts.forEach(debt => {
         if (!debt.markAsDebt) {
-          this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
+          this.root.querySelector('.not-debts__list').appendChild(this.debtsService.createRow(debt));
         } else {
-          this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
+          this.root.querySelector('.debts__list').appendChild(this.debtsService.createRow(debt));
         }
       });
       this.root.querySelector('.debts__list .list--title span').innerHTML = `
@@ -11415,32 +11413,9 @@ class Debts {
       this.root.querySelector('.debts__list').innerHTML = '';
       this.root.querySelector('.not-debts__list').innerHTML = '';
       filteredDebts.forEach(debtDone => {
-        this.root.querySelector('.not-debts__list').appendChild(this.createRow(debtDone));
+        this.root.querySelector('.not-debts__list').appendChild(this.debtsService.createRow(debtDone));
       });
     }
-  }
-  createRow(debt) {
-    const div = document.createElement('div');
-    div.classList.add('debt-row');
-    div.setAttribute('id', debt.id);
-    debt.isOver ? div.classList.add('over') : '';
-    div.innerHTML = `
-                ${debt.isOver ? '<div class="over-debt">Выплачен</div>' : ''}
-                <div class="row-first">
-                    <span>${debt.name}</span>
-                    <span class="blue-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(debt.remaining)} руб</span>
-                </div>
-                <div class="row-second">
-                    <span>Платеж в месяц:</span>
-                    <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(debt.sumPerMonth)} руб</span>
-                </div>
-                <div class="buttons hide">
-                    ${!debt.isOver ? '<div class="btn over-btn">Выплачен</div>' : '<div class="btn over-btn get-back">Все еще должен</div>'}
-                    <div class="btn edit-btn">Редактировать</div>
-                    <div class="btn back-btn">Удалить</div>
-                </div>
-            `;
-    return div;
   }
   async init() {
     this.debts = await this.debtsService.getDebts();
@@ -11699,6 +11674,8 @@ class DataBaseService {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DebtsService; });
 /* harmony import */ var _services_dataBase_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/dataBase.service */ "./src/js/services/dataBase.service.js");
+/* harmony import */ var _helpers_currency_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helpers/currency.helper */ "./src/js/helpers/currency.helper.js");
+
 
 class DebtsService {
   constructor() {
@@ -11714,6 +11691,29 @@ class DebtsService {
     }
     const debt = this.debts.filter(debt => debt.id === id);
     return debt[0];
+  }
+  createRow(debt) {
+    const div = document.createElement('div');
+    div.classList.add('debt-row');
+    div.setAttribute('id', debt.id);
+    debt.isOver ? div.classList.add('over') : '';
+    div.innerHTML = `
+                ${debt.isOver ? '<div class="over-debt">Выплачен</div>' : ''}
+                <div class="row-first">
+                    <span>${debt.name}</span>
+                    <span class="blue-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_1__["addSeparator"])(debt.remaining)} руб</span>
+                </div>
+                <div class="row-second">
+                    <span>Платеж в месяц:</span>
+                    <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_1__["addSeparator"])(debt.sumPerMonth)} руб</span>
+                </div>
+                <div class="buttons hide">
+                    ${!debt.isOver ? '<div class="btn over-btn">Выплачен</div>' : '<div class="btn over-btn get-back">Все еще должен</div>'}
+                    <div class="btn edit-btn">Редактировать</div>
+                    <div class="btn back-btn">Удалить</div>
+                </div>
+            `;
+    return div;
   }
 }
 
