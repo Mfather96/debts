@@ -11287,8 +11287,22 @@ __webpack_require__.r(__webpack_exports__);
 
 
 window.addEventListener('DOMContentLoaded', () => {
-  new _modules_debts__WEBPACK_IMPORTED_MODULE_0__["default"]().init();
-  new _modules_total__WEBPACK_IMPORTED_MODULE_1__["default"]().init();
+  const root = document.querySelector('.root');
+  const tabs = document.querySelector('.tabs');
+  const debts = new _modules_debts__WEBPACK_IMPORTED_MODULE_0__["default"](root);
+  debts.init();
+  new _modules_total__WEBPACK_IMPORTED_MODULE_1__["default"](root).init();
+  tabs.addEventListener('click', e => {
+    let target = e.target;
+    Array.from(tabs.children).forEach(tab => tab.classList.remove('active'));
+    e.target.classList.add('active');
+    if (target && target.classList.contains('done-tab')) {
+      debts.prepareDebtsLists('done');
+    } else {
+      debts.prepareDebtsLists();
+    }
+    debts.listenDebtsHandlers();
+  });
 });
 
 /***/ }),
@@ -11312,9 +11326,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Debts {
-  constructor() {
+  constructor(root) {
     this.debts = [];
-    this.root = document.querySelector('.root');
+    this.root = root;
     this.addNewBtn = this.root.querySelector('.add-new');
     this.debtsService = new _services_debts_service__WEBPACK_IMPORTED_MODULE_2__["default"]();
     this.dataBaseService = new _services_dataBase_service__WEBPACK_IMPORTED_MODULE_1__["default"]();
@@ -11349,11 +11363,6 @@ class Debts {
           if (debt.classList.contains('list--title')) {
             debt.parentNode.classList.toggle('opened');
           }
-          let clas = e.target.classList;
-          switch (clas) {
-            case clas.contains('back-btn'):
-              console.log('back');
-          }
           if (e.target.classList.contains('back-btn')) {
             await this.dataBaseService.deleteDebt(debtData);
             location.reload();
@@ -11376,54 +11385,39 @@ class Debts {
   bindTriggers() {
     this.listenAddNewBtn();
     this.listenDebtsHandlers();
-
-    // this.root.querySelector('.debts__wrapper').addEventListener('click', async (e) => {
-    //     e.preventDefault();
-
-    //     if (e.target) {
-
-    //         // if (e.target.classList.contains('list--title')) {
-    //         //     e.target.parentNode.classList.toggle('opened');
-    //         // }
-
-    //         if (e.target.closest('.debt-row')) {
-    //             debtID = e.target.closest('.debt-row').getAttribute('id');
-    //             debt = this.debtsService.getDebtById(debtID);
-    //         }
-
-    //         if (e.target.classList.contains('back-btn')) {
-    //             await this.dataBaseService.deleteDebt(debt);
-    //             location.reload();
-    //         }
-
-    //         if (e.target.classList.contains('over-btn')) {
-    //             debt.isOver
-    //                 ? await this.dataBaseService.updateDebt(debt, {isOver: false})
-    //                 : await this.dataBaseService.updateDebt(debt, {isOver: true});
-
-    //             location.reload();
-    //         }
-
-    //         if (e.target.classList.contains('edit-btn')) {
-    //             this.modal.openModal(true, debt);
-    //         }
-    //     }
-    // })
   }
-  prepareDebtsLists() {
-    this.debts.forEach(debt => {
-      if (!debt.markAsDebt) {
-        this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
-      } else {
-        this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
-      }
-    });
-    this.root.querySelector('.debts__list .list--title span').innerHTML = `
-            (${this.debts.filter(debt => debt.markAsDebt).length})
-        `;
-    this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
-            (${this.debts.filter(debt => !debt.markAsDebt).length})
-        `;
+  prepareDebtsLists(tab = 'actual') {
+    this.filterDebts(tab);
+  }
+  filterDebts(tab) {
+    let filteredDebts = this.debts.filter(debt => tab === 'done' ? debt.isOver : !debt.isOver);
+    if (tab !== 'done') {
+      this.root.querySelector('.not-debts__list').innerHTML = `
+                 <div class="list--title">Ежемесячные расходы <span></span></div>
+            `;
+      this.root.querySelector('.debts__list').innerHTML = `
+                <div class="list--title">Обязательные долги <span></span></div>        
+            `;
+      filteredDebts.forEach(debt => {
+        if (!debt.markAsDebt) {
+          this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
+        } else {
+          this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
+        }
+      });
+      this.root.querySelector('.debts__list .list--title span').innerHTML = `
+                (${filteredDebts.filter(debt => debt.markAsDebt).length})
+            `;
+      this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
+                (${filteredDebts.filter(debt => !debt.markAsDebt).length})
+            `;
+    } else {
+      this.root.querySelector('.debts__list').innerHTML = '';
+      this.root.querySelector('.not-debts__list').innerHTML = '';
+      filteredDebts.forEach(debtDone => {
+        this.root.querySelector('.not-debts__list').appendChild(this.createRow(debtDone));
+      });
+    }
   }
   createRow(debt) {
     const div = document.createElement('div');
@@ -11588,8 +11582,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Total {
-  constructor() {
-    this.root = document.querySelector('.root');
+  constructor(root) {
+    this.root = root;
     this.calcService = new _services_calc_service__WEBPACK_IMPORTED_MODULE_1__["default"]();
   }
   async update() {

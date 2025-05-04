@@ -8,6 +8,31 @@ img {
     z-index: -1;
 }
 
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+
+    .tab {
+        text-align: center;
+        width: 100%;     
+        padding: 8px;
+        color: #ccc;
+        width: 40%;
+        transition: width ease 0.1s;
+
+        &.active {
+            color: #000;
+            font-weight: bold;
+            width: 60%;
+            background: rgba(37, 236, 226, 0.2);
+        }
+        
+        &:first-child {
+            border-right: 1px solid #ccc;
+        }
+    }
+}
+
 .loader {
     width: 50px;
     height: 50px;
@@ -20,7 +45,7 @@ img {
 
 .root {
     position: relative;
-    padding-bottom: 80px;
+    padding-bottom: 110px;
     width: 100%;
     max-width: 736px;
     height: 100%;

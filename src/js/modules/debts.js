@@ -75,21 +75,46 @@ export default class Debts {
         this.listenDebtsHandlers();
     }
 
-    prepareDebtsLists() {
-        this.debts.forEach(debt => {
-            if (!debt.markAsDebt) {
-                this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
-            } else {
-                this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
-            }
-        })
-        this.root.querySelector('.debts__list .list--title span').innerHTML = `
-            (${this.debts.filter(debt => debt.markAsDebt).length})
-        `
+    prepareDebtsLists(tab = 'actual') {
+        this.filterDebts(tab);
+    }
 
-        this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
-            (${this.debts.filter(debt => !debt.markAsDebt).length})
-        `
+    filterDebts(tab) {
+        let filteredDebts = this.debts.filter(debt => tab === 'done' ? debt.isOver : !debt.isOver);
+
+        if (tab !== 'done') {
+            this.root.querySelector('.not-debts__list').innerHTML = `
+                 <div class="list--title">Ежемесячные расходы <span></span></div>
+            `;
+            this.root.querySelector('.debts__list').innerHTML = `
+                <div class="list--title">Обязательные долги <span></span></div>        
+            `;
+
+            filteredDebts.forEach(debt => {
+                if (!debt.markAsDebt) {
+                    this.root.querySelector('.not-debts__list').appendChild(this.createRow(debt));
+                } else {
+                    this.root.querySelector('.debts__list').appendChild(this.createRow(debt));
+                }
+            })
+
+            this.root.querySelector('.debts__list .list--title span').innerHTML = `
+                (${filteredDebts.filter(debt => debt.markAsDebt).length})
+            `
+    
+            this.root.querySelector('.not-debts__list .list--title span').innerHTML = `
+                (${filteredDebts.filter(debt => !debt.markAsDebt).length})
+            `
+        } else {
+            this.root.querySelector('.debts__list').innerHTML = '';
+            this.root.querySelector('.not-debts__list').innerHTML = '';
+
+            filteredDebts.forEach(debtDone => {
+                this.root.querySelector('.not-debts__list').appendChild(this.createRow(debtDone));
+            })
+        }
+
+
     }
 
     createRow(debt) {
