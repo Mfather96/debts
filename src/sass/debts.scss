@@ -112,6 +112,10 @@
 
         .over-btn {
             background: rgb(95, 161, 95);
+
+            &.get-back {
+                background: rgb(183, 154, 6);
+            }
         }
         .back-btn {
             background: rgba(139, 0, 0, 0.699);

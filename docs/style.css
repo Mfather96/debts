@@ -249,6 +249,9 @@ img {
 .debt-row .buttons .over-btn {
   background: rgb(95, 161, 95);
 }
+.debt-row .buttons .over-btn.get-back {
+  background: rgb(183, 154, 6);
+}
 .debt-row .buttons .back-btn {
   background: rgba(139, 0, 0, 0.699);
 }

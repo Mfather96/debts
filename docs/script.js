@@ -11435,7 +11435,7 @@ class Debts {
                     <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(debt.sumPerMonth)} руб</span>
                 </div>
                 <div class="buttons hide">
-                    <div class="btn over-btn">Выплачен</div>
+                    ${!debt.isOver ? '<div class="btn over-btn">Выплачен</div>' : '<div class="btn over-btn get-back">Все еще должен</div>'}
                     <div class="btn edit-btn">Редактировать</div>
                     <div class="btn back-btn">Удалить</div>
                 </div>
