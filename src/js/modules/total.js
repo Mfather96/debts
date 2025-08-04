@@ -10,12 +10,22 @@ export default class Total {
     async update() {
         const perMonth = await this.calcService.getTotalSumPerMonth();
         const remaining = await this.calcService.getTotalSumRemaining();
+        const requiredSum = await this.calcService.getRequiredSum();
+        const monthlySum = await this.calcService.getMonthlySum();
         const div = document.createElement('div');
         div.classList.add('total__wrapper');
         div.innerHTML = `
             <div class="total__per-month-wrp">
                 <span>Всего в месяц:</span>
                 <span class="green-currency">${addSeparator(perMonth)} руб</span>
+            </div>
+            <div class="total__per-month-wrp required">
+                <span>Обязательные:</span>
+                <span class="green-currency">${addSeparator(requiredSum)} руб</span>
+            </div>
+            <div class="total__per-month-wrp monthly">
+                <span>Ежемесячные:</span>
+                <span class="green-currency">${addSeparator(monthlySum)} руб</span>
             </div>
             <div class="total__remaining-wrp">
                 <span>Остаток всего долга:</span>
@@ -31,7 +41,8 @@ export default class Total {
         }
     }
 
-    init() {
+    async init() {
+        await this.calcService.init();
         this.update();
     }
 }

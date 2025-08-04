@@ -1,14 +1,15 @@
 import Debts from "./modules/debts"
 import Total from "./modules/total";
+import CalculatorService from "./services/calc.service";
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     const root = document.querySelector('.root');
     const tabs = document.querySelector('.tabs');
 
     const debts = new Debts(root);
     debts.init();
 
-    new Total(root).init();
+    await new Total(root).init();
 
     tabs.addEventListener('click', (e) => {
         let target = e.target;

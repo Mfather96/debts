@@ -11284,14 +11284,16 @@ function addSeparator(num) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_debts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/debts */ "./src/js/modules/debts.js");
 /* harmony import */ var _modules_total__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/total */ "./src/js/modules/total.js");
+/* harmony import */ var _services_calc_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/calc.service */ "./src/js/services/calc.service.js");
 
 
-window.addEventListener('DOMContentLoaded', () => {
+
+window.addEventListener('DOMContentLoaded', async () => {
   const root = document.querySelector('.root');
   const tabs = document.querySelector('.tabs');
   const debts = new _modules_debts__WEBPACK_IMPORTED_MODULE_0__["default"](root);
   debts.init();
-  new _modules_total__WEBPACK_IMPORTED_MODULE_1__["default"](root).init();
+  await new _modules_total__WEBPACK_IMPORTED_MODULE_1__["default"](root).init();
   tabs.addEventListener('click', e => {
     let target = e.target;
     Array.from(tabs.children).forEach(tab => tab.classList.remove('active'));
@@ -11564,12 +11566,22 @@ class Total {
   async update() {
     const perMonth = await this.calcService.getTotalSumPerMonth();
     const remaining = await this.calcService.getTotalSumRemaining();
+    const requiredSum = await this.calcService.getRequiredSum();
+    const monthlySum = await this.calcService.getMonthlySum();
     const div = document.createElement('div');
     div.classList.add('total__wrapper');
     div.innerHTML = `
             <div class="total__per-month-wrp">
                 <span>Всего в месяц:</span>
                 <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(perMonth)} руб</span>
+            </div>
+            <div class="total__per-month-wrp required">
+                <span>Обязательные:</span>
+                <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(requiredSum)} руб</span>
+            </div>
+            <div class="total__per-month-wrp monthly">
+                <span>Ежемесячные:</span>
+                <span class="green-currency">${Object(_helpers_currency_helper__WEBPACK_IMPORTED_MODULE_0__["addSeparator"])(monthlySum)} руб</span>
             </div>
             <div class="total__remaining-wrp">
                 <span>Остаток всего долга:</span>
@@ -11583,7 +11595,8 @@ class Total {
       this.root.appendChild(div);
     }
   }
-  init() {
+  async init() {
+    await this.calcService.init();
     this.update();
   }
 }
@@ -11607,13 +11620,21 @@ class CalculatorService {
     this.allDebts = [];
     this.debtsService = new _services_debts_service__WEBPACK_IMPORTED_MODULE_0__["default"]();
   }
-  async getTotalSumPerMonth() {
+  async init() {
+    console.log('2');
     this.allDebts = await this.debtsService.getDebts();
+  }
+  getTotalSumPerMonth() {
     return this.allDebts.filter(debt => !debt.isOver).reduce((sum, debt) => sum + debt.sumPerMonth, 0);
   }
-  async getTotalSumRemaining() {
-    this.allDebts = await this.debtsService.getDebts();
+  getTotalSumRemaining() {
     return this.allDebts.filter(debt => !debt.isOver).reduce((sum, debt) => sum + debt.remaining, 0);
+  }
+  getRequiredSum() {
+    return this.allDebts.filter(debt => !debt.isOver && debt.markAsDebt).reduce((sum, debt) => sum + debt.sumPerMonth, 0);
+  }
+  getMonthlySum() {
+    return this.allDebts.filter(debt => !debt.isOver && !debt.markAsDebt).reduce((sum, debt) => sum + debt.sumPerMonth, 0);
   }
 }
 
